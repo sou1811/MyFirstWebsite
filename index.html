@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Tax Calculator (India)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+            max-width: 700px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            font-size: 1.1em;
+        }
+        .deduction-group {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Indian Tax Calculator</h1>
+
+    <label for="regime">Select Tax Regime:</label>
+    <select id="regime">
+        <option value="old">Old Regime</option>
+        <option value="new">New Regime</option>
+    </select>
+
+    <label for="income">Annual Income (in ₹):</label>
+    <input type="number" id="income" placeholder="Enter your income">
+
+    <div id="deductions-group" class="deduction-group">
+        <h3>Deductions (Only for Old Regime)</h3>
+
+        <label for="deduction80C">Section 80C (Max ₹1,50,000):</label>
+        <input type="number" id="deduction80C" placeholder="Enter 80C deductions">
+
+        <label for="deductionHRA">House Rent Allowance (HRA):</label>
+        <input type="number" id="deductionHRA" placeholder="Enter HRA exemption">
+
+        <label for="deductionLTA">Leave Travel Allowance (LTA):</label>
+        <input type="number" id="deductionLTA" placeholder="Enter LTA exemption">
+
+        <label for="deductionOther">Other Deductions:</label>
+        <input type="number" id="deductionOther" placeholder="Enter other deductions">
+    </div>
+
+    <button onclick="calculateTax()">Calculate Tax</button>
+
+    <div id="result"></div>
+    <div id="summary" class="summary" style="display:none;"></div>
+
+    <script>
+        document.getElementById('regime').addEventListener('change', function() {
+            const deductionsGroup = document.getElementById('deductions-group');
+            if (this.value === 'old') {
+                deductionsGroup.style.display = 'block';
+            } else {
+                deductionsGroup.style.display = 'none';
+            }
+        });
+
+        function calculateTax() {
+            const regime = document.getElementById('regime').value;
+            const income = parseFloat(document.getElementById('income').value) || 0;
+
+            let deduction80C = 0, deductionHRA = 0, deductionLTA = 0, deductionOther = 0;
+            let totalDeductions = 0;
+
+            if (regime === 'old') {
+                deduction80C = Math.min(parseFloat(document.getElementById('deduction80C').value) || 0, 150000);
+                deductionHRA = parseFloat(document.getElementById('deductionHRA').value) || 0;
+                deductionLTA = parseFloat(document.getElementById('deductionLTA').value) || 0;
+                deductionOther = parseFloat(document.getElementById('deductionOther').value) || 0;
+
+                totalDeductions = deduction80C + deductionHRA + deductionLTA + deductionOther;
+            }
+
+            let taxableIncome = income;
+
+            if (regime === 'old') {
+                taxableIncome = Math.max(0, income - totalDeductions);
+            }
+
+            let tax = 0;
+
+            if (regime === 'old') {
+                if (taxableIncome <= 250000) {
+                    tax = 0;
+                } else if (taxableIncome <= 500000) {
+                    tax = (taxableIncome - 250000) * 0.05;
+                } else if (taxableIncome <= 1000000) {
+                    tax = (250000 * 0.05) + (taxableIncome - 500000) * 0.20;
+                } else {
+                    tax = (250000 * 0.05) + (500000 * 0.20) + (taxableIncome - 1000000) * 0.30;
+                }
+
+                if (taxableIncome <= 500000) {
+                    tax = 0;
+                }
+
+            } else {
+                if (taxableIncome <= 300000) {
+                    tax = 0;
+                } else if (taxableIncome <= 600000) {
+                    tax = (taxableIncome - 300000) * 0.05;
+                } else if (taxableIncome <= 900000) {
+                    tax = (300000 * 0.05) + (taxableIncome - 600000) * 0.10;
+                } else if (taxableIncome <= 1200000) {
+                    tax = (300000 * 0.05) + (300000 * 0.10) + (taxableIncome - 900000) * 0.15;
+                } else if (taxableIncome <= 1500000) {
+                    tax = (300000 * 0.05) + (300300 * 0.10) + (300000 * 0.15) + (taxableIncome - 1200000) * 0.20;
+                } else {
+                    tax = (300000 * 0.05) + (300000 * 0.10) + (300000 * 0.15) + (300000 * 0.20) + (taxableIncome - 1500000) * 0.30;
+                }
+
+                if (taxableIncome <= 700000) {
+                    tax = 0;
+                }
+            }
+
+            document.getElementById('result').innerHTML = `Tax Payable: ₹${tax.toFixed(2)}`;
+
+            let summaryHtml = `<strong>Summary:</strong><br>`;
+            summaryHtml += `Annual Income: ₹${income.toFixed(2)}<br>`;
+
+            if (regime === 'old') {
+                summaryHtml += `Total Deductions:<br>`;
+                summaryHtml += `&nbsp; - 80C: ₹${deduction80C.toFixed(2)}<br>`;
+                summaryHtml += `&nbsp; - HRA: ₹${deductionHRA.toFixed(2)}<br>`;
+                summaryHtml += `&nbsp; - LTA: ₹${deductionLTA.toFixed(2)}<br>`;
+                summaryHtml += `&nbsp; - Other: ₹${deductionOther.toFixed(2)}<br>`;
+                summaryHtml += `Total Deductions: ₹${totalDeductions.toFixed(2)}<br>`;
+            } else {
+                summaryHtml += `Deductions not applicable under New Regime.<br>`;
+            }
+
+            summaryHtml += `Taxable Income: ₹${taxableIncome.toFixed(2)}<br>`;
+
+            document.getElementById('summary').innerHTML = summaryHtml;
+            document.getElementById('summary').style.display = 'block';
+        }
+
+        document.getElementById('deductions-group').style.display = 'block';
+    </script>
+
+</body>
+</html>
